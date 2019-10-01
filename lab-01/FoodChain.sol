@@ -11,8 +11,8 @@ contract FoodChain {
     struct Proposal {
         bool isVetoed;
     }
-    enum Phase {init, voting, closed}
-    Phase state;
+    enum State {init, voting, closed}
+    State currentState;
     enum statusCode {success, notAllowed, incorrectState, invalidParameter}
 
     address organizer;
@@ -20,20 +20,27 @@ contract FoodChain {
     mapping(uint => address) voterAddresses;
     uint numVoters;
     Proposal[] proposals;
+    uint startTime = 0;
+    uint duration = 0;
+
+    modifier timed(){
+        if(currentState==State.voting && now > (startTime + duration))
+            currentState = State.closed;
+        _;
+    }
 
     /// Create a new poll with numProposals different proposals
     constructor(uint8 numProposals) public {
         organizer = msg.sender; // The person who creates the poll is the organizer
         proposals.length = numProposals;
         numVoters = 0;
-        state = Phase.init;
+        currentState = State.init;
         // Initialize all proposals as not vetoed
         for (uint8 prop = 0; prop < proposals.length; prop++) proposals[prop].isVetoed = false;
     }
 
-    function invite(address voterAddress, bool allowVeto) public returns(statusCode code) {
+    function invite(address voterAddress, bool allowVeto) public timed returns(statusCode code) {
         if(msg.sender != organizer) return statusCode.notAllowed; // sender is not organizer
-        if(state!=Phase.init && state!=Phase.voting) return statusCode.incorrectState; // poll is not ready for invites or is closed
         if(voters[voterAddress].isInvited) return statusCode.success; // voter is already invited
         voters[voterAddress].canVeto = allowVeto;
         voters[voterAddress].isInvited = true;
@@ -44,43 +51,45 @@ contract FoodChain {
         return statusCode.success;
     }
 
-    function rsvp(bool intent) public returns(statusCode code) {
+    function rsvp(bool intent) public timed returns(statusCode code) {
         if(!voters[msg.sender].isInvited) return statusCode.notAllowed; // if voter isn't invited they cannot rsvp
-        if(state != Phase.voting) return statusCode.incorrectState; // rsvp only allowed during voting
+        if(currentState != State.voting) return statusCode.incorrectState; // rsvp only allowed during voting
         voters[msg.sender].willAttend = intent; // set the voter rsvp status, must be true to vote
         return statusCode.success;
     }
 
-    function vote(int8[] memory votesArray) public returns(statusCode code) {
+    function vote(int8[] memory votesArray) public timed returns(statusCode code) {
         Voter storage sender = voters[msg.sender];
         // To vote, the sender must be invited, be attending, and have the correct # of up/down votes
         if (!sender.isInvited || !sender.willAttend) return statusCode.notAllowed;
-        if(state != Phase.voting) return statusCode.incorrectState;
+        if(currentState != State.voting) return statusCode.incorrectState;
         if(votesArray.length != proposals.length) return statusCode.invalidParameter;
         sender.votes = votesArray; // store the number
         sender.hasVoted = true;
         return statusCode.success;
     }
 
-    function veto(uint8 proposalID) public returns(statusCode code) {
+    function veto(uint8 proposalID) public timed returns(statusCode code) {
         Voter storage sender = voters[msg.sender];
         // must be invited, attending voter, with veto power
         if (!sender.isInvited || !sender.willAttend || !sender.canVeto) return statusCode.notAllowed;
-        if(state != Phase.voting) return statusCode.incorrectState;
+        if(currentState != State.voting) return statusCode.incorrectState;
         if(proposalID > proposals.length-1) return statusCode.invalidParameter; // no such proposal
         proposals[proposalID].isVetoed = true;
         return statusCode.success;
     }
 
-    function openPoll() public returns(statusCode code) {
+    function openPoll(uint durationSecs) public returns(statusCode code) {
         if(msg.sender != organizer) return statusCode.notAllowed;
-        state = Phase.voting;
+        currentState = State.voting;
+        startTime = now;
+        duration = durationSecs;
         return statusCode.success;
     }
 
     function closePoll() public returns (statusCode code) {
         if(msg.sender != organizer) return statusCode.notAllowed;
-        state = Phase.closed;
+        currentState = State.closed;
         return statusCode.success;
     }
 
