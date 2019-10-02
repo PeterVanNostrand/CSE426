@@ -6,11 +6,13 @@ contract FoodChain {
         bool isInvited;
         bool willAttend;
         bool canVeto;
-        int8[] votes;
+        uint8[] votes;
     }
     struct Proposal {
         bool isVetoed;
+        bool isDropped;
     }
+
     enum State {init, voting, closed}
     State currentState;
     enum statusCode {success, notAllowed, incorrectState, invalidParameter}
@@ -22,6 +24,8 @@ contract FoodChain {
     Proposal[] proposals;
     uint startTime = 0;
     uint duration = 0;
+    uint256 constant UINT256_MAX = ~uint256(0);
+    uint8 constant UINT8_MAX = ~uint8(0);
 
     modifier timed(){
         if(currentState==State.voting && now > (startTime + duration))
@@ -58,7 +62,7 @@ contract FoodChain {
         return statusCode.success;
     }
 
-    function vote(int8[] memory votesArray) public timed returns(statusCode code) {
+    function vote(uint8[] memory votesArray) public timed returns(statusCode code) {
         Voter storage sender = voters[msg.sender];
         // To vote, the sender must be invited, be attending, and have the correct # of up/down votes
         if (!sender.isInvited || !sender.willAttend) return statusCode.notAllowed;
@@ -93,33 +97,54 @@ contract FoodChain {
         return statusCode.success;
     }
 
-    function winningProposal() public view returns (int winnerID) {
-        int[] memory propVotes = new int[](proposals.length);
+    function winningProposal() public view returns (uint8 winnerID) {
+        Proposal[] memory local_props = proposals; // copy of proposals array
 
-        // Count the votes for each prproposal
-        for (uint i = 0; i < numVoters; i++){ // For every voter
-            address a = voterAddresses[i];
-            Voter memory v = voters[a];
-            // if voter is "valid" and has voted add their votes
-            if(v.isInvited && v.willAttend && v.hasVoted){
-                // Count their vote for each proposal
-                for (uint8 prop = 0; prop < proposals.length; prop++){
-                    if(v.votes[prop]==1 || v.votes[prop]==-1) // users may only up/down vote
-                        propVotes[prop] += v.votes[prop]; // add vote to proposal
+        // Count the number of valid (not-vetoed or dropped) proposals
+        uint8 validProposals = 0;
+        for (uint8 prop = 0; prop < local_props.length; prop++)
+            if(!local_props[prop].isVetoed) validProposals++;
+
+        // Drop all but one proposal
+        while(validProposals>1){
+            uint[] memory propVotes = new uint[](local_props.length);
+            // Count the votes for each proposal
+            for (uint i = 0; i < numVoters; i++){ // For every voter
+                address a = voterAddresses[i];
+                Voter memory v = voters[a];
+                // if voter is "valid" and has voted, count their vote
+                if(v.isInvited && v.willAttend && v.hasVoted){
+                    // Determine the voters first valid choice
+                    uint topChoiceIndex = 0;
+                    // if the voters ith choice is vetoed or eliminated, check their next choice
+                    while(local_props[v.votes[topChoiceIndex]].isDropped || local_props[v.votes[topChoiceIndex]].isVetoed)
+                        topChoiceIndex++;
+                    // Count their vote for the first valid choice
+                    propVotes[v.votes[topChoiceIndex]] += 1;
                 }
             }
+
+            // Determine the most losing proposal
+            uint losingVoteCount = UINT256_MAX;
+            uint8 losingProp = UINT8_MAX;
+            for (uint8 prop = 0; prop < local_props.length; prop++){
+                // vetoed and dropped proposals have already lost
+                if(local_props[prop].isVetoed || local_props[prop].isDropped) continue;
+                if (propVotes[prop] < losingVoteCount) {
+                    losingVoteCount = propVotes[prop];
+                    losingProp = prop;
+                }
+            }
+            // Drop the loser
+            local_props[losingProp].isDropped = true;
+            validProposals--;
         }
 
-        // Determine wining proposal
-        int winningVoteCount = 0;
-        int winningProp = -1;
-        for (uint8 prop = 0; prop < proposals.length; prop++){
-            if(proposals[prop].isVetoed) continue; // vetoed proposals can't win
-            if (propVotes[prop] > winningVoteCount) {
-                winningVoteCount = propVotes[prop];
+        // The one remaining valid proposal is the winner
+        uint8 winningProp = UINT8_MAX;
+        for (uint8 prop = 0; prop < local_props.length; prop++)
+            if(!local_props[prop].isVetoed && !local_props[prop].isDropped)
                 winningProp = prop;
-            }
-        }
         return winningProp;
     }
 }
