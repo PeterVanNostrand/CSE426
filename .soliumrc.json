@@ -1,9 +1,0 @@
-{
-    "extends": "solium:all",
-    "rules": {
-        "operator-whitespace": 0,
-        "conditionals-whitespace": 0,
-        "lbrace": 0,
-        "linebreak-style" : 0
-    }
-}
