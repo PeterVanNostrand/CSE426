@@ -23,7 +23,10 @@ pragma solidity >=0.4.0 <0.6.0;
             f.openPoll(100);
 
             uint result = uint(f.invite(address(voters[0]), false));
-            Assert.equal(result, 0, "Invite failed");
+            Assert.equal(result, 0, "No Veto Invite failed");
+
+            uint result1 = uint(f.invite(address(voters[1]), true));
+            Assert.equal(result1, 0, "Veto Invite failed");
         }
 
         function checkRSVP() public{
@@ -114,7 +117,7 @@ pragma solidity >=0.4.0 <0.6.0;
         }
       }
 
-      contract test_voter{
+    contract test_voter{
         function rsvp(FoodChain f, bool intent) public returns (uint statusCode){
             return uint(f.rsvp(intent));
         }
@@ -124,4 +127,4 @@ pragma solidity >=0.4.0 <0.6.0;
         function veto(FoodChain f, uint8 proposalID) public returns (uint statusCode){
             return uint(f.veto(proposalID));
         }
-      }
+    }
