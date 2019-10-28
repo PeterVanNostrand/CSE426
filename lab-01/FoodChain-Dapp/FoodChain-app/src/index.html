@@ -8,7 +8,10 @@
     <title>FoodChain Dapp</title>
 
     <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet"> -->
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -18,53 +21,209 @@
     <![endif]-->
   </head>
   <body>
-    <label for="txtOpen">Open for Duration</label>
-    <input type="text" id="txtOpen">
-    <button type="button" id="btnOpen">Open Poll</button>
-    <button type="button" id="btnClose">Close Poll</button>
-    <br>
-    <br>
-    <label for="selRegister">Invite Voter</label>
-    <select id="selRegister" value=""></select>
-    <br>
-    <label for="txtCanVeto">Veto Allowed</label>
-    <input type="text" id="txtCanVeto">
-    <br>
-    <button type="button" id="btnRegister">Register</button>
-    <br>
-    <br>
-    <label for="txtRSVP">RSVP</label>
-    <input type="text" id="txtRSVP">
-    <button type="button" id="btnRSVP">RSVP</button>
-    <br>
-    <br>
-    <label for="txtVeto">Veto Proposal</label>
-    <input type="text" id="txtVeto">
-    <button type="button" id="btnVeto">Veto</button>
-    <br>
-    <br>
-    <label for="choice1">First Choice</label>
-    <input type="text" id="txtChoice1">
-    <br>
-    <label for="txtChoice2">Second Choice</label>
-    <input type="text" id="txtChoice2">
-    <br>
-    <label for="txtChoice3">Third Choice</label>
-    <input type="text" id="txtChoice3">
-    <br>
-    <label for="txtChoice4">Fourth Choice</label>
-    <input type="text" id="txtChoice4">
-    <br>
-    <button type="button" id="btnVote">Vote</button>
-    <br>
-    <br>
-    <button type="button" id="btnWinner">Winner</button>
+<!-- Wide card with share menu button -->
+<style>
+    .demo-card-wide.mdl-card {
+      width: 512px;
+    }
+    .demo-card-wide > .mdl-card__title {
+      color: #fff;
+      height: 176px;
+      /* background: url('../assets/demos/welcome_card.jpg') center / cover; */
+    }
+    .demo-card-wide > .mdl-card__menu {
+      color: #fff;
+    }
+    </style>
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row" style="display: inline; text-align: center; padding: 0px;">
+        <!-- Title -->
+        <span class="mdl-layout-title" style="font-size: 32px; line-height: 1.6em;">FoodChain</span>
+        <!-- Add spacer, to align navigation to the right -->
+        <div class="mdl-layout-spacer"></div>
+        <!-- Navigation. We hide it in small screens. -->
+      </div>
+    </header>
+    <main class="mdl-layout__content">
+      <div class="page-content">
+          <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="margin: 50px auto 50px auto;">
+              <div class="mdl-card__title mdl-card--border" style="height: 4em;">
+                <h2 class="mdl-card__title-text" style="color: black;">Poll Controls</h2>
+              </div>
+              <div class="mdl-card__supporting-text">
+                  <div style="width: 100%; text-align: center;">
+                    <!-- <input type="text" id="txtOpen" style="width: 80%;"> -->
+                    <form action="#">
+                        <div class="mdl-textfield mdl-js-textfield">
+                          <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="txtOpen">
+                          <label class="mdl-textfield__label" for="txtOpen">Duration (seconds)</label>
+                          <span class="mdl-textfield__error">Input is not a number!</span>
+                        </div>
+                      </form>
+                  </div>
+                  <br>
+                  <div style="text-align: center; width: 80%; margin: 0 auto;">
+                    <div style="float:left; width:50%; text-align:center;">
+                    <button type="button" id="btnOpen" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Open Poll</button>
+                    </div>
+                    <div style="float:left; width:50%; text-align:center;">
+                    <button type="button" id="btnClose" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Close Poll</button>
+                    </div>
+                  </div>
+              </div>
+            </div>
+        
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="margin: 50px auto 50px auto;">
+                <div class="mdl-card__title mdl-card--border" style="height: 4em;">
+                  <h2 class="mdl-card__title-text" style="color: black;">Invite Voter</h2>
+                </div>
+                <div class="mdl-card__supporting-text" style="text-align: center;">
+                  <!-- <label for="selRegister">Invite Voter</label> -->
+                  <select id="selRegister" style="width: 350px; margin: 15px auto;"></select>
+                  <br>
+                  <div style="float:left; width:50%;">
+                    <div style="margin: 0 auto; text-align: left; width: 150px; line-height: 36px; padding-left: 60px;">
+                      <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="txtCanVeto">
+                        <input type="checkbox" id="txtCanVeto" class="mdl-switch__input">
+                        <span class="mdl-switch__label" style="float: left;">Veto Allowed</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div style="float:left; width:50%; text-align:center;">
+                    <button type="button" id="btnRegister" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Invite</button>
+                  </div>
+                </div>
+            </div>
+        
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="margin: 50px auto 50px auto; min-height: 140px;">
+                <div class="mdl-card__title mdl-card--border" style="height: 4em;">
+                  <h2 class="mdl-card__title-text" style="color: black;">RSVP</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <!-- <label for="txtRSVP">RSVP</label> -->
+                    <!-- <input type="checkbox" id="txtRSVP"> -->
+                    <!-- <button type="button" id="btnRSVP" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">RSVP</button> -->
+                    <div style="float:left; width:50%;">
+                      <div style="margin: 0 auto; text-align: left; width: 150px; line-height: 36px; padding-left: 60px;">
+                        <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="txtRSVP">
+                          <input type="checkbox" id="txtRSVP" class="mdl-switch__input">
+                          <span class="mdl-switch__label" style="float: left;">Will Attend</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div style="float:left; width:50%; text-align:center;">
+                      <button type="button" id="btnRSVP" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">RSVP</button>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="margin: 50px auto 50px auto;">
+                <div class="mdl-card__title mdl-card--border" style="height: 4em;">
+                  <h2 class="mdl-card__title-text" style="color: black;">Vote</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <!-- <label for="txtVeto">Veto Proposal</label> -->
+                    <!-- <input type="text" id="txtVeto"> -->
+                    <!-- <label for="choice1">First Choice</label> -->
+                    <!-- <input type="text" id="txtChoice1"> -->
+                    <!-- Numeric Textfield with Floating Label -->
+                    <form action="#" style="text-align: center;">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="txtChoice1">
+                        <label class="mdl-textfield__label" for="txtChoice1">First Choice</label>
+                        <span class="mdl-textfield__error">Input is not a number!</span>
+                      </div>
+                    </form>
+                    <!-- <label for="txtChoice2">Second Choice</label> -->
+                    <!-- <input type="text" id="txtChoice2"> -->
+                    <form action="#" style="text-align: center;">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="txtChoice2">
+                        <label class="mdl-textfield__label" for="txtChoice2">Second Choice</label>
+                        <span class="mdl-textfield__error">Input is not a number!</span>
+                      </div>
+                    </form>
+                    <!-- <label for="txtChoice3">Third Choice</label> -->
+                    <!-- <input type="text" id="txtChoice3"> -->
+                    <form action="#" style="text-align: center;">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="txtChoice3">
+                        <label class="mdl-textfield__label" for="txtChoice3">Third Choice</label>
+                        <span class="mdl-textfield__error">Input is not a number!</span>
+                      </div>
+                    </form>
+                    <!-- <label for="txtChoice4">Fourth Choice</label> -->
+                    <!-- <input type="text" id="txtChoice4"> -->
+                    <form action="#" style="text-align: center;">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="txtChoice4">
+                        <label class="mdl-textfield__label" for="txtChoice4">Fourth Choice</label>
+                        <span class="mdl-textfield__error">Input is not a number!</span>
+                      </div>
+                    </form>
+                    <button type="button" id="btnVote" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" style="float: right; margin-right:17%;">Vote</button>
+                </div>
+            </div>
+        
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="margin: 50px auto 50px auto;">
+                <div class="mdl-card__title mdl-card--border" style="height: 4em;">
+                  <h2 class="mdl-card__title-text" style="color: black;">Veto (optional)</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <form action="#" style="text-align: center;">
+                      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="txtVeto">
+                        <label class="mdl-textfield__label" for="txtVeto">Veto Choice</label>
+                        <span class="mdl-textfield__error">Input is not a number!</span>
+                      </div>
+                    </form>
+                    <button type="button" id="btnVeto" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" style="float: right; margin-right:17%;">Veto</button>
+                </div>
+            </div>
+        
+            <div class="demo-card-wide mdl-card mdl-shadow--2dp" style="margin: 50px auto 50px auto; min-height: 140px;">
+                <div class="mdl-card__title mdl-card--border" style="height: 4em;">
+                  <h2 class="mdl-card__title-text" style="color: black;">Check Results</h2>
+                </div>
+                <div class="mdl-card__supporting-text" style="text-align: center;">
+                    <button type="button" id="btnWinner" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Check Current Winner</button>
+                </div>
+            </div>
+            <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar">
+              <div class="mdl-snackbar__text"></div>
+              <button class="mdl-snackbar__action" type="button"></button>
+            </div>
+      </div>
+    </main>
+  </div>
+    
+    
+      <!-- <label for="txtOpen">Open for Duration</label> -->
+      <!-- <input type="text" id="txtOpen">
+      <button type="button" id="btnOpen" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Open Poll</button>
+      <button type="button" id="btnClose" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Close Poll</button> -->
+      
+
+      <!-- <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fix-height">
+        <input type="text" value="" class="mdl-textfield__input" id="dlAddress" readonly>
+        <input type="hidden" value="" name="dlAddress">
+        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+        <label for="dlAddress" class="mdl-textfield__label">Address</label>
+        <ul id="selRegister" for="dlAddress" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+            <li class="mdl-menu__item" data-val="BY" data-selected="true">Belarus</li>
+        </ul>
+      </div> -->
+
+      <!-- <label for="txtCanVeto">Veto Allowed</label>
+      <input type="checkbox" id="txtCanVeto"> -->
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/dist/bootstrap.min.js"></script>
+    <!-- <script src="js/dist/bootstrap.min.js"></script> -->
     <script src="js/dist/web3.min.js"></script>
     <script src="js/dist/truffle-contract.js"></script>
     <script src="js/app.js"></script>

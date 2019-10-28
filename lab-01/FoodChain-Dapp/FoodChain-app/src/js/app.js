@@ -66,6 +66,7 @@ App = {
       new Web3(new Web3.providers.HttpProvider(App.url)).eth.getAccounts((err, accounts) => {
         jQuery.each(accounts,function(i){
           if(web3.eth.coinbase != accounts[i]){
+            // var optionElement = '<li class="mdl-menu__item" data-val="'+ accounts[i] + '">' + accounts[i] + '</li>';
             var optionElement = '<option value="'+accounts[i]+'">'+accounts[i]+'</option';
             jQuery('#selRegister').append(optionElement);  
           }
@@ -103,14 +104,17 @@ App = {
           voteInstance = instance;
   
           return voteInstance.veto(propID, {from: account});
-        }).then(function(result, error){
-              if(result){
-                console.log("\t%cSuccessfully vetoed proposal", "color:green");
-              } else {
-                console.log("\t%cError handling veto from voter: " + account, "color:red");
-                console.log(error);
-              }   
-          });
+        }).then(function(result){
+          console.log("\t%cSuccessfully vetoed proposal", "color:green");
+        }).catch(function(error){
+          console.log("\t%cRevert during open poll by voter: " + account, "color:red");
+          console.log("\t%cLikely causes:", "color: red");
+          console.log("\t%c - Must be invited to veto", "color: red");          
+          console.log("\t%c - Must be attending to veto", "color: red");
+          console.log("\t%c - Sender does not have veto power", "color: red");
+          console.log("\t%c - Poll must be open to veto", "color: red");
+          console.log("\t%c - Invalid proposal ID", "color: red");
+        });
       });
     },
 
@@ -126,14 +130,12 @@ App = {
           voteInstance = instance;
   
           return voteInstance.openPoll(time, {from: account});
-        }).then(function(result, error){
-              if(result){
-                console.log("\t%cSuccessfully opened poll", "color:green");
-              } else {
-                console.log("\t%cError opening poll by voter: " + account, "color:red");
-                console.log(error);
-              }   
-          });
+        }).then(function(result){
+          console.log("\t%cSuccessfully opened poll", "color:green");
+        }).catch(function(error){
+          console.log("\t%cRevert during open poll by voter: " + account, "color:red");
+          console.log("\t%cLikely cause: User must be organizer to open poll", "color: red");
+        });
       });
     },
 
@@ -148,14 +150,12 @@ App = {
           voteInstance = instance;
   
           return voteInstance.closePoll({from: account});
-        }).then(function(result, error){
-              if(result){
-                console.log("\t%cSuccessfully closed poll", "color:green");
-              } else {
-                console.log("\t%cError closing poll by voter: " + account, "color:red");
-                console.log(error);
-              }   
-          });
+        }).then(function(result){
+          console.log("\t%cSuccessfully closed poll", "color:green");
+        }).catch(function(error){
+          console.log("\t%cRevert during close poll from voter " + account, "color:red");
+          console.log("\t%cLikely cause: Must be organizer to close poll", "color: red");
+        });
       });
     },
 
@@ -174,13 +174,12 @@ App = {
           voteInstance = instance;
   
           return voteInstance.invite(addr, canVeto, {from: account});
-        }).then(function(result, error){
-              if(result){
+        }).then(function(result){
+              // if(parseInt(result.receipt.status) == 1){
                 console.log("\t%cRegistration Successfull", "color:green");
-              } else {
-                console.log("\t%cError during registration for voter " + account, "color:red");
-                console.log(error);
-              }   
+          }).catch(function(error){
+            console.log("\t%cRevert during RSVP for voter " + account, "color:red");
+            console.log("\t%cLikely cause: User must be organizer to invite", "color: red");
           });
       });
     },
@@ -199,13 +198,13 @@ App = {
           voteInstance = instance;
   
           return voteInstance.rsvp(attend, {from: account});
-        }).then(function(result, error){
-              if(result){
-                console.log("\t%cRSVP Successfull", "color:green");
-              } else {
-                console.log("\t%cError during RSVP for voter " + account, "color:red");
-                console.log(error);
-              }   
+        }).then(function(result){
+            console.log("\t%cRSVP Successfull", "color:green");
+          }).catch(function(error){
+            console.log("\t%cRevert during RSVP for voter " + account, "color:red");
+            console.log("\t%cLikely causes:", "color: red");
+            console.log("\t%c - Must be invited to RSVP", "color: red");
+            console.log("\t%c - Voting must be open to RSVP", "color: red");
           });
       });
     },
@@ -232,37 +231,51 @@ App = {
           voteInstance = instance;
   
           return voteInstance.vote(votes, {from: account});
-        }).then(function(result, error){
-              if(result){
-                console.log("\t%cVoting Successfull", "color:green");
-              } else {
-                console.log("\t%cError voting for voter " + account, "color:red");
-                console.log(error);
-              }   
-          });
+        }).then(function(result){
+          console.log("\t%cVoting Successfull", "color:green");
+        }).catch(function(error){
+          console.log("\t%cRevert during voting for voter " + account, "color:red");
+          console.log("\t%cLikely causes:", "color: red");
+          console.log("\t%c - Must be invited to vote", "color: red");
+          console.log("\t%c - Must be attending to vote", "color: red");
+          console.log("\t%c - Poll must be open to vote", "color: red");
+          console.log("\t%c - Invalid number of proposals", "color: red");
+        });
       });
     },
 
     handleWinner : function() {
       console.log("Getting Winner...");
       var voteInstance;
+      var mess = "";
       App.contracts.vote.deployed().then(function(instance) {
         voteInstance = instance;
         return voteInstance.winningProposal();
       }).then(function(res){
-        console.log("\t%cSuccessfully got winner", "color: green")
         console.log("\tWinner ID: " + res);
-        alert("Choice " + res + " wins!");
+        console.log("\t%cSuccessfully got winner", "color: green");
+        mess = "Choice " + res + " wins!";
+        App.displayToast(mess, 4000);
       }).catch(function(error){
         console.log("\t%cError getting winner!", "color: red");
-        console.log(error.message);
-      })
+      });      
+    },
+
+    displayToast : function(text, duration){
+      var snackbarContainer = document.querySelector('#demo-toast-example');
+      var data = {message: text, timeout: duration};
+      snackbarContainer.MaterialSnackbar.showSnackbar(data);
     },
   };
   
   $(function() {
     $(window).load(function() {
       App.init();
+
+      App.displayToast("Please Check The Console For Detailed Information (F12)", 10000);
+
+      var welcomeText = "Welcome to the FoodChain Application!\nI reccomend keeping this console open ahd hiding all message from other sources (such as MetaMask) as I've provided useful logging messages for each function call";
+      console.log("%c"+welcomeText, "color: blue");
     });
   });
   

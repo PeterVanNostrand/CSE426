@@ -43,58 +43,54 @@ contract FoodChain {
         for (uint8 prop = 0; prop < proposals.length; prop++) proposals[prop].isVetoed = false;
     }
 
-    function invite(address voterAddress, bool allowVeto) public timed returns(statusCode code) {
-        if(msg.sender != organizer) return statusCode.notAllowed; // sender is not organizer
-        if(voters[voterAddress].isInvited) return statusCode.success; // voter is already invited
+    function invite(address voterAddress, bool allowVeto) public timed {
+        require(msg.sender == organizer, "Must be organizer");
         voters[voterAddress].canVeto = allowVeto;
         voters[voterAddress].isInvited = true;
         voters[voterAddress].hasVoted = false;
         voters[voterAddress].willAttend = false; // assume invited person will not attend
         voterAddresses[numVoters] = voterAddress;
         numVoters += 1;
-        return statusCode.success;
     }
 
-    function rsvp(bool intent) public timed returns(statusCode code) {
-        if(!voters[msg.sender].isInvited) return statusCode.notAllowed; // if voter isn't invited they cannot rsvp
-        if(currentState != State.voting) return statusCode.incorrectState; // rsvp only allowed during voting
+    function rsvp(bool intent) public timed {
+        require(voters[msg.sender].isInvited, "Must be invited to RSVP");
+        require(currentState == State.voting, "Voting must be open to RSVP");
         voters[msg.sender].willAttend = intent; // set the voter rsvp status, must be true to vote
-        return statusCode.success;
     }
 
-    function vote(uint8[] memory votesArray) public timed returns(statusCode code) {
+    function vote(uint8[] memory votesArray) public timed {
         Voter storage sender = voters[msg.sender];
         // To vote, the sender must be invited, be attending, and have the correct # of up/down votes
-        if (!sender.isInvited || !sender.willAttend) return statusCode.notAllowed;
-        if(currentState != State.voting) return statusCode.incorrectState;
-        if(votesArray.length != proposals.length) return statusCode.invalidParameter;
+        require(sender.isInvited, "Must be invited to vote");
+        require(sender.willAttend, "Must be attending to vote");
+        require(currentState == State.voting, "Poll must be open to vote");
+        require(votesArray.length == proposals.length, "Invalid number of proposals");
         sender.votes = votesArray; // store the number
         sender.hasVoted = true;
-        return statusCode.success;
     }
 
-    function veto(uint8 proposalID) public timed returns(statusCode code) {
+    function veto(uint8 proposalID) public timed {
         Voter storage sender = voters[msg.sender];
         // must be invited, attending voter, with veto power
-        if (!sender.isInvited || !sender.willAttend || !sender.canVeto) return statusCode.notAllowed;
-        if(currentState != State.voting) return statusCode.incorrectState;
-        if(proposalID > proposals.length-1) return statusCode.invalidParameter; // no such proposal
+        require(sender.isInvited, "Must be invited to veto");
+        require(sender.willAttend, "Must be attending to veto");
+        require(sender.canVeto, "Sender does not have veto power");
+        require(currentState == State.voting, "Poll must be open to veto");
+        require(proposalID <= proposals.length-1, "Invalid proposal ID");
         proposals[proposalID].isVetoed = true;
-        return statusCode.success;
     }
 
-    function openPoll(uint durationSecs) public returns(statusCode code) {
-        if(msg.sender != organizer) return statusCode.notAllowed;
+    function openPoll(uint durationSecs) public {
+        require(msg.sender == organizer, "Must be organizer to open poll");
         currentState = State.voting;
         startTime = now;
         duration = durationSecs;
-        return statusCode.success;
     }
 
-    function closePoll() public returns (statusCode code) {
-        if(msg.sender != organizer) return statusCode.notAllowed;
+    function closePoll() public {
+        require(msg.sender == organizer, "Must be organizer to close poll");
         currentState = State.closed;
-        return statusCode.success;
     }
 
     function winningProposal() public view returns (uint8 winnerID) {
