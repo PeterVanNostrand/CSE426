@@ -1,0 +1,14 @@
+{
+  "name": "foodchain-app",
+  "version": "1.0.0",
+  "description": "FoodChain Dapp",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Peter VanNostrand",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

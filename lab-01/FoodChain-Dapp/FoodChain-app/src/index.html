@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta id="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>FoodChain Dapp</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <label for="txtOpen">Open for Duration</label>
+    <input type="text" id="txtOpen">
+    <button type="button" id="btnOpen">Open Poll</button>
+    <br>
+    <br>
+    <label for="txtRegister">Register Address</label>
+    <input type="text" id="txtRegister">
+    <br>
+    <label for="txtCanVeto">Veto Allowed</label>
+    <input type="text" id="txtCanVeto">
+    <br>
+    <button type="button" id="btnRegister">Register</button>
+    <br>
+    <br>
+    <label for="txtRSVP">RSVP</label>
+    <input type="text" id="txtRSVP">
+    <button type="button" id="btnRSVP">RSVP</button>
+    <br>
+    <br>
+    <label for="txtVeto">Veto Proposal</label>
+    <input type="text" id="txtVeto">
+    <button type="button" id="btnVeto">Veto</button>
+    <br>
+    <br>
+    <label for="choice1">First Choice</label>
+    <input type="text" id="txtChoice1">
+    <br>
+    <label for="txtChoice2">Second Choice</label>
+    <input type="text" id="txtChoice2">
+    <br>
+    <label for="txtChoice3">Third Choice</label>
+    <input type="text" id="txtChoice3">
+    <br>
+    <label for="txtChoice4">Fourth Choice</label>
+    <input type="text" id="txtChoice4">
+    <br>
+    <button type="button" id="btnVote">Vote</button>
+    <br>
+    <br>
+    <button type="button" id="btnWinner">Winner</button>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/dist/bootstrap.min.js"></script>
+    <script src="js/dist/web3.min.js"></script>
+    <script src="js/dist/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

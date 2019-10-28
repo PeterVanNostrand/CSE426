@@ -1,0 +1,7 @@
+# Node JS Build Files
+lab-01/Ballot-Dapp/ballot-app/node_modules
+lab-01/FoodChain-Dapp/FoodChain-app/node_modules
+
+# Truffle Build Files
+lab-01/FoodChain-Dapp/FoodChain-contract/build
+lab-01/Ballot-Dapp/ballot-contract/build
