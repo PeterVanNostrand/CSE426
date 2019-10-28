@@ -5,6 +5,6 @@ app.use(express.static('../FoodChain-contract/build/contracts'));
 app.get('/', function (req, res) {
   res.render('index.html'); 
 });
-app.listen(3000, function () {	 
-  console.log('Example app listening on port 3000!');
+app.listen(3010, function () {	 
+  console.log('Example app listening on port 3010!');
 });

@@ -6,7 +6,6 @@ App = {
     chairPerson:null,
     currentAccount:null,
     init: function() {
-      console.log("App Init Start");
       $.getJSON('../proposals.json', function(data) {
         var proposalsRow = $('#proposalsRow');
         var proposalTemplate = $('#proposalTemplate');
@@ -20,12 +19,10 @@ App = {
           App.names.push(data[i].name);
         }
       });
-      console.log("App Init End");
       return App.initWeb3();
     },
   
     initWeb3: function() {
-      console.log("Web3 init start");
           // Is there is an injected web3 instance?
       if (typeof web3 !== 'undefined') {
         App.web3Provider = web3.currentProvider;
@@ -38,7 +35,6 @@ App = {
       ethereum.enable();
   
       App.populateAddress();
-      console.log("Web3 init end");
       return App.initContract();
     },
   
@@ -57,14 +53,13 @@ App = {
   },
   
     bindEvents: function() {
-      console.log("bind event start");
       $(document).on('click', '#btnOpen', App.handleOpen);
+      $(document).on('click', '#btnClose', App.handleClose);
       $(document).on('click', '#btnRegister', App.handleRegister);
       $(document).on('click', '#btnRSVP', App.handleRSVP);
       $(document).on('click', '#btnVeto', App.handleVeto);
       $(document).on('click', '#btnVote', App.handleVote);
       $(document).on('click', '#btnWinner', App.handleWinner);
-      console.log("bind event end");
     },
   
     populateAddress : function(){
@@ -72,7 +67,7 @@ App = {
         jQuery.each(accounts,function(i){
           if(web3.eth.coinbase != accounts[i]){
             var optionElement = '<option value="'+accounts[i]+'">'+accounts[i]+'</option';
-            jQuery('#enter_address').append(optionElement);  
+            jQuery('#selRegister').append(optionElement);  
           }
         });
       });
@@ -101,26 +96,26 @@ App = {
 
       web3.eth.getAccounts(function(error, accounts) {
         var account = accounts[0];
+        console.log("\tVoter: " + account);
+        console.log("\tVetoes proposal: " + propID)
   
         App.contracts.vote.deployed().then(function(instance) {
           voteInstance = instance;
   
           return voteInstance.veto(propID, {from: account});
-        }).then(function(result, err){
+        }).then(function(result, error){
               if(result){
-                var code = parseInt(result.receipt.status);
-                  console.log(result);
-                alert("code" + code);
+                console.log("\t%cSuccessfully vetoed proposal", "color:green");
               } else {
-                console.log(err);
-                alert(account + " voting failed")
+                console.log("\t%cError handling veto from voter: " + account, "color:red");
+                console.log(error);
               }   
           });
       });
     },
 
     handleOpen: function(){
-      console.log("handleOpen start");
+      console.log("Opening Poll...");
       var time = parseInt($('#txtOpen').val());
       var voteInstance;
 
@@ -131,24 +126,19 @@ App = {
           voteInstance = instance;
   
           return voteInstance.openPoll(time, {from: account});
-        }).then(function(result, err){
+        }).then(function(result, error){
               if(result){
-                var code = parseInt(result.receipt.status);
-                  console.log(result);
-                alert("code" + code);
+                console.log("\t%cSuccessfully opened poll", "color:green");
               } else {
-                console.log(err);
-                alert(account + " voting failed")
+                console.log("\t%cError opening poll by voter: " + account, "color:red");
+                console.log(error);
               }   
           });
       });
     },
 
-    handleRegister: function(){
-      var addr = $('#txtRegister').val();
-      var canVeto = $('#txtCanVeto').val();
-
-      console.log("handleRegister start");
+    handleClose: function(){
+      console.log("Closing Poll...");
       var voteInstance;
 
       web3.eth.getAccounts(function(error, accounts) {
@@ -157,15 +147,39 @@ App = {
         App.contracts.vote.deployed().then(function(instance) {
           voteInstance = instance;
   
-          return voteInstance.invite(addr, canVeto, {from: account});
-        }).then(function(result, err){
+          return voteInstance.closePoll({from: account});
+        }).then(function(result, error){
               if(result){
-                var code = parseInt(result.receipt.status);
-                console.log(result);
-                alert("code" + code);
+                console.log("\t%cSuccessfully closed poll", "color:green");
               } else {
-                console.log(err);
-                alert(account + " invite failed");
+                console.log("\t%cError closing poll by voter: " + account, "color:red");
+                console.log(error);
+              }   
+          });
+      });
+    },
+
+    handleRegister: function(){
+      console.log("Handling Registration...");
+      var canVeto = $('#txtCanVeto').val();
+      var addr = $('#selRegister').val() 
+      var voteInstance;
+
+      web3.eth.getAccounts(function(error, accounts) {
+        var account = accounts[0];
+        console.log("\tAccount:  " + account);
+        console.log("\tRegisters Voter:  " + addr);
+  
+        App.contracts.vote.deployed().then(function(instance) {
+          voteInstance = instance;
+  
+          return voteInstance.invite(addr, canVeto, {from: account});
+        }).then(function(result, error){
+              if(result){
+                console.log("\t%cRegistration Successfull", "color:green");
+              } else {
+                console.log("\t%cError during registration for voter " + account, "color:red");
+                console.log(error);
               }   
           });
       });
@@ -178,19 +192,19 @@ App = {
 
       web3.eth.getAccounts(function(error, accounts) {
         var account = accounts[0];
+        console.log("\tVoter: " + account);
+        console.log("\tRSVPs: " + attend);
   
         App.contracts.vote.deployed().then(function(instance) {
           voteInstance = instance;
   
           return voteInstance.rsvp(attend, {from: account});
-        }).then(function(result, err){
+        }).then(function(result, error){
               if(result){
-                var code = parseInt(result.receipt.status);
-                console.log(result);
-                alert("code" + code);
+                console.log("\t%cRSVP Successfull", "color:green");
               } else {
+                console.log("\t%cError during RSVP for voter " + account, "color:red");
                 console.log(error);
-                alert(account + " invite failed");
               }   
           });
       });
@@ -207,48 +221,47 @@ App = {
       votes[1] = choice2;
       votes[2] = choice3;
       votes[3] = choice4;
-      console.log("Votes: " + votes);
       var voteInstance;
 
       web3.eth.getAccounts(function(error, accounts) {
         var account = accounts[0];
+        console.log("\tVoter: " + account);
+        console.log("\tVotes: " + votes);
   
         App.contracts.vote.deployed().then(function(instance) {
           voteInstance = instance;
   
           return voteInstance.vote(votes, {from: account});
-        }).then(function(result, err){
+        }).then(function(result, error){
               if(result){
-                var code = parseInt(result.receipt.status);
-                console.log(result);
-                alert("code" + code);
+                console.log("\t%cVoting Successfull", "color:green");
               } else {
+                console.log("\t%cError voting for voter " + account, "color:red");
                 console.log(error);
-                alert(account + " invite failed");
               }   
           });
       });
     },
 
     handleWinner : function() {
-      console.log("Handling Winner...");
-
+      console.log("Getting Winner...");
       var voteInstance;
       App.contracts.vote.deployed().then(function(instance) {
         voteInstance = instance;
         return voteInstance.winningProposal();
       }).then(function(res){
-      console.log(res);
-        alert(res + "  is the winner ! :)");
-      }).catch(function(err){
-        console.log(err.message);
+        console.log("\t%cSuccessfully got winner", "color: green")
+        console.log("\tWinner ID: " + res);
+        alert("Choice " + res + " wins!");
+      }).catch(function(error){
+        console.log("\t%cError getting winner!", "color: red");
+        console.log(error.message);
       })
     },
   };
   
   $(function() {
     $(window).load(function() {
-      console.log("page load");
       App.init();
     });
   });
